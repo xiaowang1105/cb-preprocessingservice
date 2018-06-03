@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
+<configuration scan="true" scanPeriod="30 seconds">
+    <springProfile name="staging,production">
+        <springProperty scope="context" name="logstashHost" source="application.logstash.host"
+                        defaultValue="localhost"/>
+        <appender name="stash" class="net.logstash.logback.appender.LogstashAccessTcpSocketAppender">
+            <destination>${logstashHost}</destination>
+            <encoder class="net.logstash.logback.encoder.LogstashAccessEncoder"/>
+        </appender>
+    </springProfile>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>common</pattern>
+        </encoder>
+    </appender>
+    <appender-ref ref="CONSOLE"/>
+    <springProfile name="staging,production">
+        <appender-ref ref="stash"/>
+    </springProfile>
+</configuration>

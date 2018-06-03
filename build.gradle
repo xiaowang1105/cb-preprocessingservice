@@ -1,0 +1,66 @@
+buildscript {
+    ext {
+        springBootVersion = '2.0.2.RELEASE'
+        ch_qos_logback_version = '1.2.3'
+    }
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath('se.transmode.gradle:gradle-docker:1.2')
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'docker'
+
+group = 'windoze'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    maven {
+        url  "https://dl.bintray.com/windoze/maven"
+    }
+}
+
+
+dependencies {
+    compileOnly "org.springframework.boot:spring-boot-configuration-processor"
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.boot:spring-boot-starter-thymeleaf')
+    compile("ch.qos.logback:logback-core:$ch_qos_logback_version")
+    compile("ch.qos.logback:logback-classic:$ch_qos_logback_version")
+    compile("ch.qos.logback:logback-access:$ch_qos_logback_version")
+    compile("net.logstash.logback:logstash-logback-encoder:5.1")
+    compile("net.rakugakibox.spring.boot:logback-access-spring-boot-starter:2.7.1")
+    compile('io.springfox:springfox-swagger2:2.8.0')
+    compile('io.springfox:springfox-swagger-ui:2.8.0')
+    compile('com.huaban:jieba-analysis:1.0.2')
+    compile("com.github.windoze:jfasttext:0.1.0")
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+
+docker {
+    baseImage "windoze/fasttext:latest"
+    maintainer 'Chen Xu "windoze@0d0a.com"'
+}
+
+task buildDocker(type: Docker, dependsOn: bootJar) {
+    tagVersion = System.getenv("BUILD_NUMBER") ?: project.version
+    push = Boolean.getBoolean("docker.push")
+
+    addFile {
+        from "build/libs/${project.name}-${project.version}.jar"
+        into "/app/"
+    }
+    exposePort 8080
+    volume "/tmp"
+    workingDir "/app"
+    entryPoint = ["java", "-Dserver.tomcat.accesslog.directory=/tmp/log", "-jar", "/app/${project.name}-${project.version}.jar"]
+}
