@@ -13,10 +13,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class WordVectorizer {
-    private static final int DIMENSION = 300;
-    private static final List<Float> EMPTY_VECTOR = Collections.nCopies(DIMENSION, 0f);
+    private final int DIMENSION;
+    private final List<Float> EMPTY_VECTOR;
     private final JFastText jft = new JFastText();
-    private final Set<String> words;
 
     @Autowired
     WordVectorizer(AppConfig config) {
@@ -26,7 +25,8 @@ public class WordVectorizer {
     WordVectorizer(String modelPath) {
         try {
             jft.loadModel(modelPath);
-            words = new HashSet<>(jft.getWords());
+            DIMENSION = jft.getDim();
+            EMPTY_VECTOR = Collections.nCopies(DIMENSION, 0f);
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -34,11 +34,9 @@ public class WordVectorizer {
     }
 
     List<Float> getWordVector(String word) {
-        word = word.toLowerCase().trim();
-        if (words.contains(word)) {
-            return jft.getWordVector(word);
-        }
-        return EMPTY_VECTOR;
+        if (word == null || word.isEmpty())
+            return EMPTY_VECTOR;
+        return jft.getWordVector(word);
     }
 
     List<List<Float>> getVectors(List<String> words, int seqlen) {
@@ -56,6 +54,6 @@ public class WordVectorizer {
     }
 
     int getDimension() {
-        return jft.getDim();
+        return DIMENSION;
     }
 }
