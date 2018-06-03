@@ -16,23 +16,24 @@ import java.util.Map;
 public class PreprocessingController {
     private final Segmenter segmenter;
     private final WordVectorizer vectorizer;
-    private final Map<String, String> infoMap;
+    private final Map<String, Object> infoMap;
 
     @Autowired
     public PreprocessingController(AppConfig config, Segmenter segmenter, WordVectorizer vectorizer) {
         this.segmenter = segmenter;
         this.vectorizer = vectorizer;
-        infoMap = new HashMap<String, String>() {{
+        infoMap = new HashMap<String, Object>() {{
             put("name", "preprocessing-service");
             put("version", "v1");
             put("synonym-list", config.getSynonymListPath());
             put("user-dictionary", config.getUserDictPath());
+            put("word-vector-dimension", vectorizer.getDimension());
         }};
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/info")
     @ApiOperation("Returns information about this preprocessing service.")
-    Map<String, String> getInfo() {
+    Map<String, Object> getInfo() {
         return infoMap;
     }
 

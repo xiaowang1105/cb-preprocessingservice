@@ -20,8 +20,12 @@ public class WordVectorizer {
 
     @Autowired
     WordVectorizer(AppConfig config) {
+        this(config.getFastTextModelPath());
+    }
+
+    WordVectorizer(String modelPath) {
         try {
-            jft.loadModel(config.getFastTextModelPath());
+            jft.loadModel(modelPath);
             words = new HashSet<>(jft.getWords());
         } catch (IOException e) {
             e.printStackTrace();
@@ -49,5 +53,9 @@ public class WordVectorizer {
             ret.addAll(Collections.nCopies(seqlen - ret.size(), EMPTY_VECTOR));
         }
         return ret;
+    }
+
+    int getDimension() {
+        return jft.getDim();
     }
 }
