@@ -57,7 +57,7 @@ public class PreprocessingController {
 
     @RequestMapping(method = RequestMethod.POST, path = "/vectorize")
     @ApiOperation("Expand text into a list of word vectors.")
-    List<List<Float>> vectorize(@RequestBody String text, @ApiParam("Sequence length, 0 if no padding needed") @RequestParam(value = "seqlen", defaultValue = "0") int seqlen) {
+    List<List<Float>> vectorize(@RequestBody String text, @ApiParam("Max sequence length, 0 if no limits") @RequestParam(value = "seqlen", defaultValue = "0") int seqlen) {
         return vectorizer.getVectors(segmenter.cut(text), seqlen);
     }
 }
