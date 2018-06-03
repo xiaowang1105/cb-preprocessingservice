@@ -62,5 +62,5 @@ task buildDocker(type: Docker, dependsOn: bootJar) {
     exposePort 8080
     volume "/tmp"
     workingDir "/app"
-    entryPoint = ["java", "-Dserver.tomcat.accesslog.directory=/tmp/log", "-jar", "/app/${project.name}-${project.version}.jar"]
+    entryPoint = ["java", "-Dapplication.fastTextModelPath=/models/cc.zh.300.bin", "-jar", "/app/${project.name}-${project.version}.jar"]
 }

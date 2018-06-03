@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class WordVectorizer {
@@ -34,5 +35,19 @@ public class WordVectorizer {
             return jft.getWordVector(word);
         }
         return EMPTY_VECTOR;
+    }
+
+    List<List<Float>> getVectors(List<String> words, int seqlen) {
+        List<List<Float>> ret = words
+                .stream()
+                .limit(seqlen == 0 ? Integer.MAX_VALUE : seqlen)
+                .map(this::getWordVector)
+                .collect(Collectors.toList());
+        if (seqlen == 0) return ret;
+        if (seqlen > ret.size()) {
+            // Padding
+            ret.addAll(Collections.nCopies(seqlen - ret.size(), EMPTY_VECTOR));
+        }
+        return ret;
     }
 }

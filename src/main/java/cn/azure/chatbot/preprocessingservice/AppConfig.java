@@ -26,4 +26,20 @@ public class AppConfig {
     public String getStopwordsPath() {
         return stopwordsPath;
     }
+    public void setStopwordsPath(String stopwordsPath) {
+        this.stopwordsPath = stopwordsPath;
+    }
+
+    public void setUserDictPath(String userDictPath) {
+        this.userDictPath = userDictPath;
+    }
+
+    public void setSynonymListPath(String synonymListPath) {
+        this.synonymListPath = synonymListPath;
+    }
+
+    public void setFastTextModelPath(String fastTextModelPath) {
+        this.fastTextModelPath = fastTextModelPath;
+    }
+
 }
