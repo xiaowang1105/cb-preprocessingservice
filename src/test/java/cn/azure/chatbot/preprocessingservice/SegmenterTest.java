@@ -19,7 +19,7 @@ public class SegmenterTest {
         segmenter = new Segmenter();
         // Replace "abc" and "opq" with "def"
         segmenter.buildSynonyms(Stream.of(
-                "def=>abc,opq",
+                "someid# def abc opq",
                 "# This is a comment",
                 ""
         ));

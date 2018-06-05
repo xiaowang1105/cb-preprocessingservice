@@ -1,6 +1,5 @@
 package cn.azure.chatbot.preprocessingservice;
 
-import com.google.common.collect.Lists;
 import com.huaban.analysis.jieba.JiebaSegmenter;
 import com.huaban.analysis.jieba.WordDictionary;
 import org.slf4j.Logger;
@@ -22,13 +21,16 @@ import java.util.stream.Stream;
 @Service
 public class Segmenter {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
-    private final HashMap<String, String> synonymMap = new HashMap<>();
-    private final HashMap<String, List<String>> reversedSynonymMap = new HashMap<>();
+//    private final HashMap<String, String> synonymMap = new HashMap<>();
+//    private final HashMap<String, List<String>> reversedSynonymMap = new HashMap<>();
     private final HashSet<String> stopWords = new HashSet<>();
     private final JiebaSegmenter segmenter;
     private static final Pattern LANG_SPLITTER_RE = Pattern.compile("([\\p{InCJK_UNIFIED_IDEOGRAPHS}\\p{InCJK_COMPATIBILITY_IDEOGRAPHS}\\p{InCJK_UNIFIED_IDEOGRAPHS_EXTENSION_A}\\p{InCJK_SYMBOLS_AND_PUNCTUATION}]+)|([^\\p{InCJK_UNIFIED_IDEOGRAPHS}\\p{InCJK_COMPATIBILITY_IDEOGRAPHS}\\p{InCJK_UNIFIED_IDEOGRAPHS_EXTENSION_A}\\p{InCJK_SYMBOLS_AND_PUNCTUATION}]+)", Pattern.UNICODE_CHARACTER_CLASS | Pattern.MULTILINE);
     private static final Pattern CUT_NON_CJK_RE = Pattern.compile("\\W");
     private static final Pattern LANG_DETECTOR_RE = Pattern.compile("[\\p{InCJK_UNIFIED_IDEOGRAPHS}\\p{InCJK_COMPATIBILITY_IDEOGRAPHS}\\p{InCJK_UNIFIED_IDEOGRAPHS_EXTENSION_A}\\p{InCJK_SYMBOLS_AND_PUNCTUATION}]+");
+    private final HashMap<String, String> synonymMap = new HashMap<>(); // Word -> replacement
+    private final HashMap<String, String> synonymIndexMap = new HashMap<>();    // word -> id
+    private final HashMap<String, List<String>> reversedSynonymMap = new HashMap<>();   // id -> word list
 
     @Autowired
     public Segmenter(AppConfig config) {
@@ -70,6 +72,27 @@ public class Segmenter {
         segmenter = new JiebaSegmenter();
     }
 
+//    void buildSynonyms(Stream<String> lines) {
+//        lines.forEach(line -> {
+//            line = line.trim();
+//            // Skip empty lines
+//            if (line.isEmpty()) return;
+//            // Skip comments
+//            if (line.codePointAt(0) == '#') return;
+//            // Line should be in the format "word => syn1, syn2, ..."
+//            String[] parts = line.split("=>");
+//            if (parts.length != 2) {
+//                log.warn("Invalid line in Synonym file: '{}'", line);
+//                return;
+//            }
+//            String[] words = parts[1].split(",");
+//            // "word => syn1, syn2..." will generate "syn1:word", "syn2:word", ...
+//            Arrays.stream(words).forEach(word -> synonymMap.put(word.trim(), parts[0].trim()));
+//            // Reversed map entry is "word: list(syn1, syn2...)"
+//            reversedSynonymMap.put(parts[0].trim(), Lists.newArrayList(words));
+//        });
+//    }
+
     void buildSynonyms(Stream<String> lines) {
         lines.forEach(line -> {
             line = line.trim();
@@ -78,16 +101,19 @@ public class Segmenter {
             // Skip comments
             if (line.codePointAt(0) == '#') return;
             // Line should be in the format "word => syn1, syn2, ..."
-            String[] parts = line.split("=>");
+            String[] parts = line.split("[#=@] ");
             if (parts.length != 2) {
                 log.warn("Invalid line in Synonym file: '{}'", line);
                 return;
             }
-            String[] words = parts[1].split(",");
-            // "word => syn1, syn2..." will generate "syn1:word", "syn2:word", ...
-            Arrays.stream(words).forEach(word -> synonymMap.put(word.trim(), parts[0].trim()));
-            // Reversed map entry is "word: list(syn1, syn2...)"
-            reversedSynonymMap.put(parts[0].trim(), Lists.newArrayList(words));
+            String id = parts[0];
+            List<String> words = Arrays.stream(parts[1].split("\\s")).map(String::trim).map(String::toLowerCase).collect(Collectors.toList());
+            reversedSynonymMap.put(id, words);
+            words.forEach(word -> {
+                if (!word.equals(words.get(0)))
+                    synonymMap.put(word, words.get(0));
+                synonymIndexMap.put(word, id);
+            });
         });
     }
 
@@ -157,9 +183,11 @@ public class Segmenter {
 
     @NotNull
     List<String> getSynonyms(String word) {
-        word = word.toLowerCase().trim();
-        if (reversedSynonymMap.containsKey(word))
-            return reversedSynonymMap.get(word);
+        final String w = word.toLowerCase().trim();
+        if(synonymIndexMap.containsKey(w)) {
+            String id = synonymIndexMap.get(w);
+            return reversedSynonymMap.get(id).stream().filter(e -> !w.equals(e)).collect(Collectors.toList());
+        }
         return Collections.emptyList();
     }
 }
