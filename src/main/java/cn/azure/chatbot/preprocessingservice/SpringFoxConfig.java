@@ -15,7 +15,7 @@ public class SpringFoxConfig {
     public Docket apiDocket() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("cn.azure.chatbot.pricingservice"))
+                .apis(RequestHandlerSelectors.basePackage("cn.azure.chatbot.preprocessingservice"))
                 .paths(PathSelectors.any())
                 .build();
     }
