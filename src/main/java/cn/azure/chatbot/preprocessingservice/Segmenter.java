@@ -35,7 +35,9 @@ public class Segmenter {
     @Autowired
     public Segmenter(AppConfig config) {
         if (!config.getUserDictPath().isEmpty()) {
+            log.info("Loading user dictionary at '{}'...", config.getSynonymListPath());
             WordDictionary.getInstance().loadUserDict(Paths.get(config.getUserDictPath()));
+            log.info("User dictionary loaded.");
         }
         segmenter = new JiebaSegmenter();
         if (!config.getSynonymListPath().isEmpty()) {
