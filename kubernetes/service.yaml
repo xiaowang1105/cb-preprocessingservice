@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
       - name: shopfront
-        image: windoze/preprocessingservice:0.0.1-SNAPSHOT
+        image: chatbot-acrhub-int.chinaeast.cloudapp.chinacloudapi.cn:5000/preprocessingservice
         ports:
         - containerPort: 8080
         livenessProbe:
