@@ -18,7 +18,7 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'docker'
 
-group = 'windoze'
+group = 'chatbot-acrhub-int.chinaeast.cloudapp.chinacloudapi.cn:5000'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8
 
@@ -79,5 +79,7 @@ task buildDocker(type: Docker, dependsOn: bootJar) {
                   "-Dapplication.userDictPath=/dict/userdict.txt",
                   "-Dapplication.stopwordsPath=/dict/stopwords.txt",
                   "-Dapplication.synonymListPath=/dict/synonyms.txt",
+                  "-Dorg.bytedeco.javacpp.maxphysicalbytes=0",
+                  "-Dorg.bytedeco.javacpp.maxbytes=0",
                   "-jar", "/app/${project.name}-${project.version}.jar"]
 }
