@@ -17,7 +17,7 @@ spec:
 apiVersion: v1
 kind: ReplicationController
 metadata:
-  name: pricingservice
+  name: preprocessingservice
 spec:
   replicas: 1
   template:
@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
       - name: shopfront
-        image: chatbot-acrhub-int.chinaeast.cloudapp.chinacloudapi.cn:5000/preprocessingservice
+        image: chatbot-acrhub-int.chinaeast.cloudapp.chinacloudapi.cn:5000/preprocessingservice:0.0.2-SNAPSHOT
         ports:
         - containerPort: 8080
         livenessProbe:
